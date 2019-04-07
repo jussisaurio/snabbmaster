@@ -8,7 +8,7 @@ const {
 } = require("./constants");
 const { getTempFileName } = require("./utils");
 
-function write({ tempFile }) {
+function write({ tempFile, mimeType }) {
   return new Promise((resolve, reject) => {
     const onFailure = (err, temp, final) => {
       typeof temp === "string" && fs.unlink(temp, () => null);
@@ -16,12 +16,14 @@ function write({ tempFile }) {
       reject(err);
     };
     try {
-      const outFileName = getTempFileName("wav");
-      const outputFilePath = path.resolve(TEMP_FOLDER_PATH, outFileName);
+      const outputFilePath = path.resolve(
+        TEMP_FOLDER_PATH,
+        getTempFileName("processed", mimeType)
+      );
 
       const vstCommand = spawn(
         VST_HOST_PATH,
-        `--plugin-root ${VST_PLUGIN_ROOT} --bit-depth 24 --input ${tempFile} --output ${outputFilePath} --plugin mrs_limiter`.split(
+        `--plugin-root ${VST_PLUGIN_ROOT} --input ${tempFile} --output ${outputFilePath} --plugin mrs_limiter`.split(
           " "
         )
       );

@@ -3,52 +3,40 @@ const cors = require("cors");
 const multer = require("multer");
 const fs = require("fs");
 const vstApi = require("./vst-api");
-const { getTempFileName } = require("./utils");
-const { TEMP_FOLDER_PATH, VST_PLUGIN_ROOT } = require("./constants");
+const {
+  getTempFileName,
+  getFileInfo,
+  validateMimetype,
+  ensureTempFolders,
+  sleep
+} = require("./utils");
+const { TEMP_FOLDER_PATH } = require("./constants");
 
-[TEMP_FOLDER_PATH, VST_PLUGIN_ROOT].forEach(dir => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
-  }
-});
-
-const sleep = ms => new Promise(r => setTimeout(r, ms));
 const app = express();
-
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     cb(null, TEMP_FOLDER_PATH);
   },
   filename(req, file, cb) {
-    cb(null, getTempFileName("wav"));
+    cb(null, getTempFileName(file.originalname, file.mimetype));
   }
 });
-
 const upload = multer({ storage });
 
 app.use(cors());
 
 app.post("/upload", upload.single("waveform"), async (req, res, next) => {
   try {
-    if (!req.file) {
-      const error = new Error("No file received");
-      error.status = 400;
-      throw error;
-    }
+    const { originalFilename, uploadedFilePath, mimeType } = getFileInfo(req);
 
-    const { path: uploadedFilePath, mimetype } = req.file;
+    validateMimetype(mimeType);
 
-    if (!mimetype.toLowerCase().includes("audio")) {
-      const error = new Error(`Expected audio file, got ${mimetype}`);
-      error.status = 400;
-      throw error;
-    }
-
-    const processed = await vstApi.write({
-      tempFile: uploadedFilePath
+    const processedFilePath = await vstApi.write({
+      tempFile: uploadedFilePath,
+      mimeType
     });
 
-    res.download(processed, req.file.originalname, async err => {
+    res.download(processedFilePath, originalFilename, async err => {
       if (err) {
         console.log("saatana");
       }
@@ -58,7 +46,7 @@ app.post("/upload", upload.single("waveform"), async (req, res, next) => {
       }
 
       fs.unlink(uploadedFilePath, () => null);
-      fs.unlink(processed, () => null);
+      fs.unlink(processedFilePath, () => null);
     });
   } catch (err) {
     if (req.file && req.file.originalname) {
@@ -74,3 +62,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(process.env.PORT || 8886, () => console.log("Listening"));
+
+ensureTempFolders();

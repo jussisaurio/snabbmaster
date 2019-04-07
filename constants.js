@@ -11,8 +11,17 @@ const VST_HOST_PATH = path.resolve(
 const VST_PLUGIN_ROOT = path.resolve(__dirname, "vst");
 const TEMP_FOLDER_PATH = path.resolve(__dirname, "tmp");
 
+const ACCEPTED_MIME_TYPES = ["audio/x-aiff", "audio/x-wav", "audio/wav"];
+const MIME_TO_EXTENSION = {
+  "audio/x-aiff": "aiff",
+  "audio/x-wav": "wav",
+  "audio/wav": "wav"
+};
+
 module.exports = {
   VST_HOST_PATH,
   TEMP_FOLDER_PATH,
-  VST_PLUGIN_ROOT
+  VST_PLUGIN_ROOT,
+  ACCEPTED_MIME_TYPES,
+  MIME_TO_EXTENSION
 };
