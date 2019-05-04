@@ -1,0 +1,14 @@
+{
+  "name": "snabbmaster-processing-server",
+  "version": "1.0.0",
+  "description": "audio processing service",
+  "main": "server.js",
+  "scripts": {
+    "start": "PORT=8080 node server"
+  },
+  "author": "Jussi Saurio",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "^2.449.0"
+  }
+}

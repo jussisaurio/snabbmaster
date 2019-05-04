@@ -1,3 +1,4 @@
+# this is deprecated for now
 # base image debian stretch
 FROM node:lts-stretch
 WORKDIR /usr/src/app

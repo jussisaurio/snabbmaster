@@ -20,7 +20,7 @@ const getTempFileName = (originalName, mime) => {
     extension = parts.pop();
     identifier = parts.join(".");
   }
-  return `tmp-${identifier}-${Math.random()
+  return `tmp-${identifier.replace(/\s/g, "")}-${Math.random()
     .toString(36)
     .slice(2)}.${extension}`;
 };
@@ -32,13 +32,11 @@ const getFileInfo = req => {
     throw error;
   }
 
-  const info = {
+  return {
     originalFilename: req.file.originalname,
     uploadedFilePath: req.file.path,
     mimeType: req.file.mimetype
   };
-  console.log(info);
-  return info;
 };
 
 const validateMimetype = mime => {
@@ -62,12 +60,19 @@ const ensureTempFolders = () =>
     }
   });
 
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+const loadEnv = (envFilePath = path.resolve(__dirname, ".env")) => {
+  const env = fs.readFileSync(envFilePath, "utf8");
+
+  env.split("\n").forEach(row => {
+    const [key, value] = row.split("=");
+    process.env[key] = value;
+  });
+};
 
 module.exports = {
   getTempFileName,
   getFileInfo,
   validateMimetype,
   ensureTempFolders,
-  sleep
+  loadEnv
 };

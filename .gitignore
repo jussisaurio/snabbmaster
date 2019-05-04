@@ -1,4 +1,6 @@
-node_modules
-vst
-tmp
+**/node_modules
+processing-server/vst
+processing-server/tmp
 .DS_Store
+.env
+**/.env
